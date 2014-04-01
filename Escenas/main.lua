@@ -15,4 +15,6 @@ local options =
     params = { var1 = "custom", myVar = "another" }
 }
 
-storyboard.gotoScene( "scene1", options )
+storyboard.gotoScene( "scene1", options 
+
+	
