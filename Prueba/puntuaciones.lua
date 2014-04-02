@@ -17,6 +17,15 @@ local function eventoJuego( event )
     end
 end
 
+local function dialogo( event )
+    if "clicked" == event.action then
+        local i = event.index
+        if 1 == i then
+
+        end
+    end
+end
+
 function scene:createScene( event )
     local group = self.view
 
@@ -46,7 +55,7 @@ function scene:createScene( event )
 	}
 
 	if (#myData.partida == 1) then
-		local alert = native.showAlert( "Informacion", "No tienes puntuaciones.");
+		local alert = native.showAlert( "Información", "No tienes puntuaciones.", { "OK" }, dialogo);
 	else 
 		for i = 1, #myData.partida do
 			if (i ~= 1) then
@@ -80,7 +89,6 @@ end
 
 function scene:exitScene( event )
     local group = self.view;
-    print( "======================================" )
 end
 
 function scene:destroyScene( event )

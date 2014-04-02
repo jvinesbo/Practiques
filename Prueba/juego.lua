@@ -3,6 +3,12 @@ local myData = require "myData";
 local scene = storyboard.newScene();
 storyboard.purgeOnSceneChange = true;
 system.activate("multitouch");
+require "sqlite3";
+local db;
+
+-- conexiones sqlite para guardar puntuaciones del juego.
+local path = system.pathForFile("data.db", system.DocumentsDirectory)
+db = sqlite3.open( path ) ;
 
 local fisica = require( "physics" )
 fisica.start();
@@ -47,11 +53,9 @@ local posicion_linea_bajo = centro_y + (centro_y / 2) + ((centro_y / 2) / 2);
 
 local function movimiento( event )
     if event.phase == "began" then
-        --event.target.x = event.x -- store x location of object
-        --event.target.y = event.y -- store y location of object
     elseif event.phase == "moved" then
+        
         local x = event.x;
-        --local y = (event.y - event.yStart) + event.target.y
         local aux = 0;
 
         if (x == 30 or x < 30) then
@@ -106,7 +110,11 @@ local function comprobacion()
         timer.cancel(timer1);
     end
 
-    if (pelota.y <= posicion_linea_arriba) then
+    if (pelota.y <= posicion_linea_arriba) then     
+        -- insertamos en la base de datos la puntuación
+        local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].."Jugador 2"..[[',']].. colisiones_2 ..[[',']].. tiempo ..[['); ]]
+        db:exec( tablefill )
+
         local tabla = {
             puntos = colisiones_2; 
             jugador = "Jugador 2";
@@ -201,6 +209,11 @@ end
 function scene:createScene( event )
     local group = self.view
 
+    -- abrimos la base de datos sqlite
+    local path = system.pathForFile("puntos.db", system.DocumentsDirectory);
+    db = sqlite3.open( path ); 
+
+    -- inicializamos variables
     number = 0;
     minutos = 0;
     colisiones_1 = 0;
@@ -242,14 +255,12 @@ function scene:createScene( event )
     -- dibujamos el control inferior
     control_inferior = display.newRect( tamanyo_width / 2, posicion_linea_bajo + 30, 60, 20);
     control_inferior:setFillColor( 1, 1, 1, 0.3 );
-    fisica.addBody(control_inferior, "static", {density = 9.0});
     control_inferior.name = "control_inferior";
     group:insert(control_inferior);
 
     -- dibujamos el control superior
     control_superior = display.newRect( tamanyo_width / 2, posicion_linea_arriba - 30, 60, 20);
     control_superior:setFillColor( 1, 1, 1, 0.3 );
-    fisica.addBody(control_superior, "static", {density = 9.0});
     control_superior.name = "control_superior";
     group:insert(control_superior);
 
@@ -314,6 +325,9 @@ end
 
 function scene:exitScene( event )
     local group = self.view;
+
+    -- cerramos la base de datos.
+    db:close();
 end
 
 function scene:destroyScene( event )

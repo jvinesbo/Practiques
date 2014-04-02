@@ -56,7 +56,7 @@ function scene:createScene( event )
 	    onEvent = eventoPuntos
 	}
 
-	group:insert(btn_puntos)
+	group:insert(btn_puntos);
 end
 
 function scene:enterScene( event )
