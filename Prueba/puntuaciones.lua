@@ -1,5 +1,6 @@
 local storyboard = require "storyboard";
 local scene = storyboard.newScene();
+local myData = require "myData"
 storyboard.purgeOnSceneChange = true
 local widget = require( "widget" );
 
@@ -7,11 +8,22 @@ local widget = require( "widget" );
 local tamanyo_width = display.actualContentWidth ;
 local tamanyo_height = display.actualContentHeight;
 
+local string;
+
+local function eventoJuego( event )
+
+    if ( "ended" == event.phase ) then
+        storyboard.gotoScene( "juego");
+    end
+end
+
 function scene:createScene( event )
     local group = self.view
 
     local puntuaciones = display.newText( "Puntuaciones", tamanyo_width / 2, 30, native.systemFont, 24 );
-	puntuaciones:setFillColor( 1, 0, 0 )
+	puntuaciones:setFillColor( 1, 0, 0 );
+
+	group:insert(puntuaciones);
 
 	local function onRowRender( event )
 		local row = event.row;
@@ -19,7 +31,7 @@ function scene:createScene( event )
 		local rowHeight = row.contentHeight;
 		local rowWidth = row.contentWidth;
 
-		local rowTitle = display.newText(row, "Fila " .. row.index, 0, 0, nil, 14);
+		local rowTitle = display.newText(row, string , 0, 0, nil, 14);
 		rowTitle:setFillColor( gray )
 
 		rowTitle.anchorX = 0;
@@ -33,23 +45,46 @@ function scene:createScene( event )
 	 	onRowRender = onRowRender; 
 	}
 
-	for i = 1, 10 do
-		tableView:insertRow{};
+	if (#myData.partida == 1) then
+		local alert = native.showAlert( "Informacion", "No tienes puntuaciones.");
+	else 
+		for i = 1, #myData.partida do
+			if (i ~= 1) then
+				string = myData.partida[i].jugador .. " Puntos: " .. " " .. myData.partida[i].puntos .. " Tiempo: " .. myData.partida[i].tiempo;
+				tableView:insertRow{};
+			end
+		end
 	end
 
 	group:insert(tableView);
+
+	local btn_juego = widget.newButton{
+	    width = 150,
+	    height = 30,
+	    left = tamanyo_width / 4,
+	    top = tamanyo_height - 80,
+	    id = "btn_juego",
+	    label = "Iniciar Juego",
+	    labelColor = { default={ 1, 1, 1 }, over={ 0, 0, 0, 0.5 } },
+	    defaultFile = "defaultButton.png",
+	    overFile = "overButton.png",
+	    onEvent = eventoJuego
+	}
+
+	group:insert(btn_juego)
 end
 
 function scene:enterScene( event )
-    local group = self.view
+    local group = self.view;
 end
 
 function scene:exitScene( event )
-    local group = self.view
+    local group = self.view;
+    print( "======================================" )
 end
 
 function scene:destroyScene( event )
-    local group = self.view
+    local group = self.view;
 end
 
 scene:addEventListener( "createScene", scene );

@@ -1,6 +1,7 @@
 local storyboard = require "storyboard";
+local myData = require "myData";
 local scene = storyboard.newScene();
-storyboard.purgeOnSceneChange = true
+storyboard.purgeOnSceneChange = true;
 system.activate("multitouch");
 
 local fisica = require( "physics" )
@@ -30,15 +31,26 @@ local txt_colisones_2;
 -- variable utilizada para saber la dirección de la bola.
 local direccion = true;
 
+-- creación de controles para las paletas.
+local control_inferior;
+local control_superior;
+
+-- creación de los nombres de los jugadores
+local player_uno;
+local player_dos;
+
+-- tiempo
+local  tiempo;
+
 local posicion_linea_arriba = centro_y - (centro_y / 2) - ((centro_y / 2) / 2);
 local posicion_linea_bajo = centro_y + (centro_y / 2) + ((centro_y / 2) / 2);
 
 local function movimiento( event )
     if event.phase == "began" then
-        event.target.x = event.x -- store x location of object
+        --event.target.x = event.x -- store x location of object
         --event.target.y = event.y -- store y location of object
     elseif event.phase == "moved" then
-        local x = (event.x - event.xStart);
+        local x = event.x;
         --local y = (event.y - event.yStart) + event.target.y
         local aux = 0;
 
@@ -50,6 +62,16 @@ local function movimiento( event )
 
         if (x >= tamanyo_width - 30) then
             aux = tamanyo_width - 30;
+        end
+
+        if (event.target.name == "control_inferior") then
+            paletaInferior.x = aux;
+            player_dos.x = aux;
+        end
+
+        if (event.target.name == "control_superior") then
+            paletaSuperior.x = aux;
+            player_uno.x = aux;
         end
 
         event.target.x = aux;
@@ -72,8 +94,26 @@ end
 
 -- evento periodico que lo que hace es comporbar si hemos terminado la partida.
 local function comprobacion()
-    if (pelota.y >= posicion_linea_bajo or pelota.y <= posicion_linea_arriba) then
-        --storyboard.gotoScene( "puntuaciones");
+    if (pelota.y >= posicion_linea_bajo) then
+        local tabla = {
+            puntos = colisiones_1; 
+            jugador = "Jugador 1";
+            tiempo = tiempo;
+        };
+        myData.partida[#myData.partida + 1] = tabla;
+
+        storyboard.gotoScene( "puntuaciones");
+        timer.cancel(timer1);
+    end
+
+    if (pelota.y <= posicion_linea_arriba) then
+        local tabla = {
+            puntos = colisiones_2; 
+            jugador = "Jugador 2";
+            tiempo = tiempo;
+        };
+        myData.partida[#myData.partida + 1] = tabla;
+        storyboard.gotoScene( "puntuaciones");
         timer.cancel(timer1);
     end
 
@@ -104,20 +144,22 @@ local function cronometro()
     end
 
     if (number < 10 and minutos == 0) then
-        txt_crono.text = minutos .. "0:0" .. number;
+        tiempo = minutos .. "0:0" .. number;
     end
 
     if (number >= 10 and minutos == 0) then
-        txt_crono.text = minutos .. "0:" .. number;
+        tiempo = minutos .. "0:" .. number;
     end
 
     if (minutos > 0 and minutos < 10 and number < 10) then
-        txt_crono.text = "0" .. minutos .. ":0" .. number;
+        tiempo = "0" .. minutos .. ":0" .. number;
     end
 
     if (minutos > 0 and minutos < 10 and number >= 10) then
-        txt_crono.text = "0" .. minutos .. ":" .. number;
+        tiempo = "0" .. minutos .. ":" .. number;
     end
+
+    txt_crono.text = tiempo;
 end
 
 -- metodo utilizado para emitir un sonido cuando la bola colisiona con las tabletas de los jugadores. También utilizamos
@@ -154,113 +196,65 @@ local function golpeo_pared( event )
     end
 end
 
--- función que utilizamos par incrementar la posición de la paleta. Mediante el nombre comprobamos que bóton es el que lanza el evento.
-local function incrementar( event )
-    if ( event.phase == "began" ) then
-        if (event.target.name == "derecho_superior") then
-            paletaSuperior.x = paletaSuperior.x + 2;
-        end
-        if (event.target.name == "derecho_inferior") then
-            paletaInferior.x = paletaInferior.x + 2;
-        end
-    elseif ( event.phase == "ended" ) then
-        if (event.target.name == "derecho_superior") then
-            paletaSuperior.x = paletaSuperior.x + 2;
-        end
-        if (event.target.name == "derecho_inferior") then
-            paletaInferior.x = paletaInferior.x + 2;
-        end
-    end
-end
-
--- función que utilizamos par decrementar la posición de la paleta. Mediante el nombre comprobamos que bóton es el que lanza el evento.
-local function decrementar( event )
-    if ( event.phase == "began" ) then
-        if (event.target.name == "izquierdo_superior") then
-            paletaSuperior.x = paletaSuperior.x - 2;
-        end
-        if (event.target.name == "izquierdo_inferior") then
-            paletaInferior.x = paletaInferior.x - 2;
-        end
-    elseif ( event.phase == "ended" ) then
-        if (event.target.name == "izquierdo_superior") then
-            paletaSuperior.x = paletaSuperior.x - 2;
-        end
-        if (event.target.name == "izquierdo_inferior") then
-            paletaInferior.x = paletaInferior.x - 2;
-        end
-    end
-end
-
 -- mediante esta función lo que hacemos es crear la escena del juego.
 -- añadimos cada objeto creado al group para así destruir todos los objetos cuando pasamos de escena.
 function scene:createScene( event )
     local group = self.view
+
+    number = 0;
+    minutos = 0;
+    colisiones_1 = 0;
+    colisiones_2 = 0;
 
     local hierba = display.newImageRect( "hierba.jpg", 320, 480 );
     hierba.x = 160;
     hierba.y = 240;
     group:insert(hierba);
 
-    -- boton izquierdo inferior
-    local boton_izquierdo_inf = display.newImageRect( "flechaizquierda.png", 30, 30 );
-    boton_izquierdo_inf.x = tamanyo_width / 2 - 30;
-    boton_izquierdo_inf.y = posicion_linea_bajo + 30;
-    boton_izquierdo_inf:addEventListener( "touch", decrementar );
-    boton_izquierdo_inf.name = "izquierdo_inferior";
-    group:insert(boton_izquierdo_inf);
-
-    -- boton derecho inferior
-    local boton_derecho_inf = display.newImageRect( "flechaderecha.png", 30, 30 );
-    boton_derecho_inf.x = tamanyo_width / 2 + 30;
-    boton_derecho_inf.y = posicion_linea_bajo + 30;
-    boton_derecho_inf:addEventListener( "touch", incrementar);
-    boton_derecho_inf.name = "derecho_inferior";
-    group:insert( boton_derecho_inf );
-
-    -- boton izquierdo superior
-    local boton_izquierdo_sup = display.newImageRect( "flechaizquierda.png", 30, 30 );
-    boton_izquierdo_sup.x = tamanyo_width / 2 - 30;
-    boton_izquierdo_sup.y = posicion_linea_arriba - 30;
-    boton_izquierdo_sup:addEventListener( "touch", decrementar );
-    boton_izquierdo_sup.name = "izquierdo_superior";
-    group:insert(boton_izquierdo_sup);
-
-    -- boton derecho superior
-    local boton_derecho_sup = display.newImageRect( "flechaderecha.png", 30, 30 );
-    boton_derecho_sup.x = tamanyo_width / 2 + 30;
-    boton_derecho_sup.y = posicion_linea_arriba - 30;
-    boton_derecho_sup:addEventListener( "touch", incrementar);
-    boton_derecho_sup.name = "derecho_superior";
-    group:insert( boton_derecho_sup );
-
     -- lo que hacemos es mostrar el texto para saber quien es cada jugador.
-    local player_uno = display.newText( "Jugador 1", 40 , 45, native.systemFontBold, 12 );
+    player_uno = display.newText( "Jugador 1", display.contentWidth / 2 , 30, native.systemFontBold, 12 );
     player_uno:setFillColor( 1, 0, 0 );
     group:insert( player_uno );
-    local player_dos = display.newText( "Jugador 2", 40 , display.contentHeight - 40, native.systemFontBold, 12 );
+
+    player_dos = display.newText( "Jugador 2", display.contentWidth / 2 , display.contentHeight - 30, native.systemFontBold, 12 );
     player_dos:setFillColor( 1, 0, 0 );
     group:insert( player_dos );
 
     -- escribimos el número de rebotes de los jugadores.
     txt_colisiones_1 = display.newText( "Rebotes: " .. colisiones_1, tamanyo_width - 50 , 45, native.systemFontBold, 12 );
     txt_colisiones_2 = display.newText( "Rebotes: " .. colisiones_2, tamanyo_width - 50, display.contentHeight - 40, native.systemFontBold, 12 );
+    group:insert(txt_colisiones_1);
+    group:insert(txt_colisiones_2);
 
     -- dibujamos la paleta superior para que el jugador pueda parar la bola.
     paletaSuperior = display.newRect( tamanyo_width / 2, posicion_linea_arriba + 10, 60, 10);
     paletaSuperior:setFillColor( 1, 0.4, 0.1, 0.7 );
-    fisica.addBody(paletaSuperior, "kinematic", {density = 9.0});
+    fisica.addBody(paletaSuperior, "static", {density = 9.0});
     group:insert(paletaSuperior);
 
     -- dibujamos la paleta inferior para que el jugador pueda parar la bola.
     paletaInferior = display.newRect( tamanyo_width / 2, posicion_linea_bajo - 10, 60, 10);
     paletaInferior:setFillColor( 1, 0.4, 0.1, 0.7 );
-    fisica.addBody(paletaInferior, "kinematic", {density = 9.0});
+    fisica.addBody(paletaInferior, "static", {density = 9.0});
     paletaInferior.name = "paletaInferior";
     group:insert(paletaInferior);
 
-    paletaInferior:addEventListener( "touch", movimiento );
-    paletaSuperior:addEventListener( "touch", movimiento );
+    -- dibujamos el control inferior
+    control_inferior = display.newRect( tamanyo_width / 2, posicion_linea_bajo + 30, 60, 20);
+    control_inferior:setFillColor( 1, 1, 1, 0.3 );
+    fisica.addBody(control_inferior, "static", {density = 9.0});
+    control_inferior.name = "control_inferior";
+    group:insert(control_inferior);
+
+    -- dibujamos el control superior
+    control_superior = display.newRect( tamanyo_width / 2, posicion_linea_arriba - 30, 60, 20);
+    control_superior:setFillColor( 1, 1, 1, 0.3 );
+    fisica.addBody(control_superior, "static", {density = 9.0});
+    control_superior.name = "control_superior";
+    group:insert(control_superior);
+
+    control_inferior:addEventListener( "touch", movimiento );
+    control_superior:addEventListener( "touch", movimiento );
 
     paletaInferior:addEventListener( "collision", colisiona );
     paletaSuperior:addEventListener( "collision", colisiona );
@@ -319,12 +313,11 @@ function scene:enterScene( event )
 end
 
 function scene:exitScene( event )
-    local group = self.view
+    local group = self.view;
 end
 
 function scene:destroyScene( event )
-    local group = self.view
-    timer.cancel(cronometro);
+    local group = self.view;
 end
 
 scene:addEventListener( "createScene", scene );
