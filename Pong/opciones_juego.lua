@@ -31,8 +31,8 @@ function scene:createScene( event )
     local btn_juego = widget.newButton{
 	    width = 150,
 	    height = 30,
-	    left = tamanyo_width / 2,
-	    top = tamanyo_height / 2,
+	    left = display.contentWidth / 2 + 20,
+	    top = tamanyo_height - 200,
 	    id = "btn_juego",
 	    label = "Iniciar Juego",
 	    labelColor = { default={ 1, 1, 1 }, over={ 0, 0, 0, 0.5 } },
@@ -46,8 +46,8 @@ function scene:createScene( event )
 	local btn_puntos = widget.newButton{
 	    width = 150,
 	    height = 30,
-	    left = tamanyo_width / 2,
-	    top = tamanyo_height - 200,
+	    left = display.contentWidth / 2 + 20,
+	    top = tamanyo_height / 2,
 	    id = "btn_puntos",
 	    label = "Puntuaciones",
 	    labelColor = { default={ 1, 1, 1 }, over={ 0, 0, 0, 0.5 } },
