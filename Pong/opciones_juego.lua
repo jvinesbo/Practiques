@@ -8,7 +8,7 @@ local tamanyo_height = display.actualContentHeight;
 local function eventoJuego( event )
 
     if ( "ended" == event.phase ) then
-        storyboard.gotoScene( "juego");
+        storyboard.gotoScene( "nombre_jugador");
     end
 end
 

@@ -8,7 +8,7 @@ local contador = 0;
 
 -- incluimos una variable y el sqlite3
 local db;
-require "sqlite3"
+local sqlite3 = require "sqlite3"
 
 -- conexiones sqlite para guardar puntuaciones del juego.
 local path = system.pathForFile("data.db", system.DocumentsDirectory)
@@ -19,7 +19,7 @@ local function cargar()
 	progressView:setProgress( contador );
 
 	if (contador == 1) then
-		storyboard.gotoScene( "opciones_juego");
+		storyboard.gotoScene( "nombre_jugador");
 	end
 end 
 
@@ -49,11 +49,9 @@ function scene:createScene( event )
 
 	-- creamos la tabla si no existe, despues recorremos la tabla para recuperar todas las puntuaciones. Despues lo añadimos al myData
 	local tablesetup = [[CREATE TABLE IF NOT EXISTS puntuaciones (id INTEGER PRIMARY KEY, jugador, puntos, tiempo);]];
-	print(tablesetup);
-	db:exec( tablesetup );
+	local  aux =  db:exec( tablesetup );
 
 	for row in db:nrows("SELECT * FROM puntuaciones") do
-		print( "hola" )
 		local tabla = {
             puntos = row.puntos; 
             jugador = row.jugador;

@@ -39,11 +39,18 @@ local txt_marcador_2;
 local direccion = true;
 
 -- creación de los nombres de los jugadores
+local player_uno_name;
+local player_dos_name;
+
+-- creación de los nombres de los jugadores
 local player_uno;
 local player_dos;
 
 -- tiempo
 local  tiempo;
+
+-- empezar el crono del tiempo de la partida
+local crono_empezado = false;
 
 -- velocidad de la bola
 local velocidad = 200;
@@ -95,15 +102,46 @@ local function golpeo_bola( event )
     end
 end
 
+local function cronometro()
+    number = number + 1;
+    if (number == 60) then
+        number = 0;
+        minutos = minutos + 1;
+    end
+
+    if (number < 10 and minutos == 0) then
+        tiempo = minutos .. "0:0" .. number;
+    end
+
+    if (number >= 10 and minutos == 0) then
+        tiempo = minutos .. "0:" .. number;
+    end
+
+    if (minutos > 0 and minutos < 10 and number < 10) then
+        tiempo = "0" .. minutos .. ":0" .. number;
+    end
+
+    if (minutos > 0 and minutos < 10 and number >= 10) then
+        tiempo = "0" .. minutos .. ":" .. number;
+    end
+
+    txt_crono.text = tiempo;
+end
+
 local function pintar_bola()
+    if (crono_empezado == false) then
+        crono_empezado = true;
+        cronometro = timer.performWithDelay(1000, cronometro, 0);
+    end
+    local velocidad_y = math.random(-80, 80);
     -- dibujamos la pelota y la posicionamos
     if (bola_pintada == false) then
         pelota = display.newCircle( display.contentWidth / 2, centro_y, 10 );
         pelota:setFillColor( 1,1,1 );
         fisica.addBody(pelota, "dynamic", {bounce=1, density = 9.0, radius = 10});
-        pelota:setLinearVelocity( velocidad, 0);
+        pelota:setLinearVelocity( velocidad, velocidad_y);
 
-            -- evento de colisión para que suene la pelota al colisionar contra las paletas.
+        -- evento de colisión para que suene la pelota al colisionar contra las paletas.
         sonido_pelota = audio.loadSound( "golpe_pelota.mp3" );
         pelota:addEventListener( "collision", golpeo_bola );
 
@@ -143,10 +181,13 @@ local function comprobacion()
     if (puntos_1 == tantos) then
          local tabla = {
             puntos = puntos_1; 
-            jugador = "Jugador 1";
+            jugador = player_uno_name;
             tiempo = tiempo;
         };
         myData.partida[#myData.partida + 1] = tabla;
+
+        local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].. player_uno_name ..[[',']].. puntos_1 ..[[',']].. tiempo ..[['); ]]
+        db:exec(tablefill)
 
         storyboard.gotoScene( "puntuaciones");
         timer.cancel(timer1);
@@ -155,10 +196,14 @@ local function comprobacion()
     if (puntos_2 == tantos) then
         local tabla = {
             puntos = puntos_2; 
-            jugador = "Jugador 2";
+            jugador = player_dos_name;
             tiempo = tiempo;
         };
         myData.partida[#myData.partida + 1] = tabla;
+        
+        local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].. player_dos_name ..[[',']].. puntos_2 ..[[',']].. tiempo ..[['); ]]
+        db:exec(tablefill)
+
         storyboard.gotoScene( "puntuaciones");
         timer.cancel(timer1);
     end
@@ -166,32 +211,6 @@ local function comprobacion()
     -- actualizamos el texto para saber el número de rebotes de los jugadores.
     txt_marcador_1.text = puntos_1;
     txt_marcador_2.text = puntos_2;
-end
-
-local function cronometro()
-    number = number + 1;
-    if (number == 60) then
-        number = 0;
-        minutos = minutos + 1;
-    end
-
-    if (number < 10 and minutos == 0) then
-        tiempo = minutos .. "0:0" .. number;
-    end
-
-    if (number >= 10 and minutos == 0) then
-        tiempo = minutos .. "0:" .. number;
-    end
-
-    if (minutos > 0 and minutos < 10 and number < 10) then
-        tiempo = "0" .. minutos .. ":0" .. number;
-    end
-
-    if (minutos > 0 and minutos < 10 and number >= 10) then
-        tiempo = "0" .. minutos .. ":" .. number;
-    end
-
-    txt_crono.text = tiempo;
 end
 
 local function golpeo_pared( event )
@@ -212,6 +231,10 @@ function scene:createScene( event )
     minutos = 0;
     puntos_1 = 0;
     puntos_2 = 0;
+    crono_empezado = false;
+
+    player_uno_name = myData.name_player_one;
+    player_dos_name = myData.name_player_two;
 
     -- mostrar información al usuario.
     local alert = native.showAlert( "Información", "Pulse sobre el fondo para que salga la bola.", { "OK" }, dialogo);
@@ -227,11 +250,11 @@ function scene:createScene( event )
     fondo:addEventListener( "touch", pintar_bola );
 
     -- lo que hacemos es mostrar el texto para saber quien es cada jugador.
-    player_uno = display.newText( "Jugador 1", 30 , 15, native.systemFontBold, 12 );
+    player_uno = display.newText( player_uno_name, 30 , 15, native.systemFontBold, 12 );
     player_uno:setFillColor( 1, 1, 1 );
     group:insert( player_uno );
 
-    player_dos = display.newText( "Jugador 2", display.contentWidth - 30 , display.contentHeight - 15, native.systemFontBold, 12 );
+    player_dos = display.newText( player_dos_name, display.contentWidth - 30 , display.contentHeight - 15, native.systemFontBold, 12 );
     player_dos:setFillColor( 1, 1, 1 );
     group:insert( player_dos );
 
@@ -279,7 +302,7 @@ function scene:createScene( event )
     linea_arriba:addEventListener( "collision", golpeo_pared );
 
     -- dibujamos el cronómetro
-    txt_crono = display.newText( minutos .. "0:0" .. number, display.contentWidth - 20, 20, native.systemFont, 18 );
+    txt_crono = display.newText( minutos .. "0:0" .. number, display.contentWidth / 2 + (display.contentWidth / 3), 20, native.systemFont, 18 );
     group:insert( txt_crono );
 end
 
@@ -289,7 +312,6 @@ function scene:enterScene( event )
     -- cuando entramos en la escena arrancamos los timer. timer1 nos sirve para controlar el final del juego.
     -- cronometro para medir el tiempo de la partida.
     timer1 = timer.performWithDelay(300, comprobacion, 0);
-    cronometro = timer.performWithDelay(1000, cronometro, 0);
 end
 
 function scene:exitScene( event )

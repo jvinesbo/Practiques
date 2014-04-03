@@ -112,7 +112,7 @@ local function comprobacion()
 
     if (pelota.y <= posicion_linea_arriba) then     
         -- insertamos en la base de datos la puntuación
-        local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].."Jugador 2"..[[',']].. colisiones_2 ..[[',']].. tiempo ..[['); ]]
+        local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].."Jugador 2"..[[',']].. puntos_2 ..[[',']].. tiempo ..[['); ]]
         db:exec( tablefill )
 
         local tabla = {

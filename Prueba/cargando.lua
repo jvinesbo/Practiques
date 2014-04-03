@@ -50,8 +50,8 @@ function scene:createScene( event )
 	-- creamos la tabla si no existe, despues recorremos la tabla para recuperar todas las puntuaciones. Despues lo añadimos al myData
 	local tablesetup = [[CREATE TABLE IF NOT EXISTS puntuaciones (id INTEGER PRIMARY KEY, jugador, puntos, tiempo);]];
 	print(tablesetup);
-	db:exec( tablesetup );
-
+	local aux = db:exec( tablesetup );
+	print( "Auxiliar " .. aux )
 	for row in db:nrows("SELECT * FROM puntuaciones") do
 		print( "hola" )
 		local tabla = {
