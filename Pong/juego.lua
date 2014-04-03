@@ -61,8 +61,8 @@ local bola_pintada = false;
 -- número de puntos para que termine la partida
 local tantos = 5;
 
-local posicion_linea_arriba = centro_y - (centro_y / 2) - ((centro_y / 2) / 2);
-local posicion_linea_bajo = centro_y + (centro_y / 2) + ((centro_y / 2) / 2);
+-- controles
+local controlSuperior;
 
 local function movimiento( event )
     if event.phase == "began" then
@@ -264,13 +264,13 @@ function scene:createScene( event )
     group:insert(txt_marcador_1);
     group:insert(txt_marcador_2);
 
-    -- dibujamos la paleta superior para que el jugador pueda parar la bola.
+    -- dibujamos la paleta izquierda para que el jugador pueda parar la bola.
     paletaSuperior = display.newRect( 30, display.contentHeight / 2, 12, 70);
     paletaSuperior:setFillColor( 1, 1, 1 );
     fisica.addBody(paletaSuperior, "static", {density = 9.0});
     group:insert(paletaSuperior);
 
-    -- dibujamos la paleta inferior para que el jugador pueda parar la bola.
+    -- dibujamos la paleta derecha para que el jugador pueda parar la bola.
     paletaInferior = display.newRect( display.contentWidth - 30, display.contentHeight / 2, 12, 70);
     paletaInferior:setFillColor( 1, 1, 1 );
     fisica.addBody(paletaInferior, "static", {density = 9.0});
