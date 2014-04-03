@@ -8,7 +8,7 @@ local txt_player_uno;
 local txt_player_dos;
 
 local player_uno_name = "Juan";
-local player_dos_name = "David";
+local player_dos_name = "Pepe";
 
 local nombre;
 
@@ -69,34 +69,25 @@ end
 function scene:createScene( event )
     local group = self.view;
 
-    local fondo = display.newImageRect( "puntuaciones.png", 480, 320 )
+    local fondo = display.newImageRect( "nombres.png", 480, 320 )
 	fondo.x = 240
 	fondo.y = 160
 
 	group:insert(fondo);
 
 	-- Create text field
-	txt_player_uno = native.newTextField( display.contentWidth / 2 + (display.contentWidth / 4), 180, 180, 30 );
+	txt_player_uno = native.newTextField( display.contentWidth / 2 + (display.contentWidth / 6), 180, 180, 30 );
 	txt_player_uno:addEventListener( "userInput", textListener );
 	txt_player_uno.name = "player_uno";
 	native.setKeyboardFocus( txt_player_uno );
 	group:insert(txt_player_uno);
 
 	-- Create text field
-	txt_player_dos = native.newTextField( display.contentWidth / 2 + (display.contentWidth / 4), 220, 180, 30 );
+	txt_player_dos = native.newTextField( display.contentWidth / 2 + (display.contentWidth / 6), 220, 180, 30 );
 	txt_player_dos:addEventListener( "userInput", textListener );
 	txt_player_dos.name = "player_dos";
 	native.setKeyboardFocus( txt_player_dos );
 	group:insert(txt_player_dos);
-
-	-- lo que hacemos es mostrar el texto para saber quien es cada jugador.
-    player_uno = display.newText( "Jugador 1", display.contentHeight / 2 , 180, native.systemFontBold, 24 );
-    player_uno:setFillColor( 0, 0, 0 );
-    group:insert( player_uno );
-
-    player_dos = display.newText( "Jugador 2", display.contentHeight / 2  , 220, native.systemFontBold, 24 );
-    player_dos:setFillColor( 0, 0, 0 );
-    group:insert( player_dos );
 
     local btn_juego = widget.newButton{
 	    width = 150,

@@ -28,8 +28,9 @@ local contador = 0;
 local txt_crono;
 local number = 0;
 local minutos = 0;
-local paletaSuperior;
-local paletaInferior;
+
+local paletaIzquierda;
+local paletaDerecha;
 -- variables utilizadas para contar el número de rebotes de la pelota en la paleta.
 local puntos_1 = 0;
 local puntos_2 = 0;
@@ -37,32 +38,23 @@ local txt_marcador_1;
 local txt_marcador_2;
 -- variable utilizada para saber la dirección de la bola.
 local direccion = true;
-
 -- creación de los nombres de los jugadores
 local player_uno_name;
 local player_dos_name;
-
 -- creación de los nombres de los jugadores
 local player_uno;
 local player_dos;
-
 -- tiempo
 local  tiempo;
-
 -- empezar el crono del tiempo de la partida
 local crono_empezado = false;
-
--- velocidad de la bola
-local velocidad = 200;
-
 -- comprobar si la bola ya esta pintada
 local bola_pintada = false;
-
 -- número de puntos para que termine la partida
 local tantos = 5;
-
--- controles
-local controlSuperior;
+-- velocidad de la bola
+local velocidad_y;
+local velocidad_x;
 
 local function movimiento( event )
     if event.phase == "began" then
@@ -71,14 +63,14 @@ local function movimiento( event )
         local y = event.y;
         local aux = y;
 
-        if (y == paletaInferior.height / 2 or y < paletaInferior.height / 2) then
-            aux = paletaInferior.height / 2;
+        if (y == 30 or y < 30) then
+            aux = 30;
         else
             aux = y;
         end
 
-        if (y >= display.contentHeight - paletaInferior.height / 2) then
-            aux = display.contentHeight - paletaInferior.height / 2;
+        if (y >= display.contentHeight - 30) then
+            aux = display.contentHeight - 30;
         end
 
         event.target.y = aux;
@@ -133,13 +125,14 @@ local function pintar_bola()
         crono_empezado = true;
         cronometro = timer.performWithDelay(1000, cronometro, 0);
     end
-    local velocidad_y = math.random(-80, 80);
+    velocidad_y = math.random(-80, 80);
+    velocidad_x = math.random(100, 200);
     -- dibujamos la pelota y la posicionamos
     if (bola_pintada == false) then
         pelota = display.newCircle( display.contentWidth / 2, centro_y, 10 );
-        pelota:setFillColor( 1,1,1 );
+        pelota:setFillColor( 1, 1, 1, 0.7 );
         fisica.addBody(pelota, "dynamic", {bounce=1, density = 9.0, radius = 10});
-        pelota:setLinearVelocity( velocidad, velocidad_y);
+        pelota:setLinearVelocity( velocidad_x, velocidad_y);
 
         -- evento de colisión para que suene la pelota al colisionar contra las paletas.
         sonido_pelota = audio.loadSound( "golpe_pelota.mp3" );
@@ -162,7 +155,7 @@ end
 -- evento periodico que lo que hace es comporbar si hemos terminado la partida.
 local function comprobacion()
     if (bola_pintada == true) then
-        if (pelota.x >= display.contentHeight * 2) then
+        if (pelota.x >= display.contentWidth) then
             pintar_bola();
             velocidad = 200;
             puntos_1 = puntos_1 + 1;
@@ -224,7 +217,7 @@ end
 -- mediante esta función lo que hacemos es crear la escena del juego.
 -- añadimos cada objeto creado al group para así destruir todos los objetos cuando pasamos de escena.
 function scene:createScene( event )
-    local group = self.view
+    local group = self.view;
 
      -- inicializamos variables
     number = 0;
@@ -246,15 +239,14 @@ function scene:createScene( event )
     fondo.x = 240;
     fondo.y = 160;
     group:insert(fondo);
-
     fondo:addEventListener( "touch", pintar_bola );
 
     -- lo que hacemos es mostrar el texto para saber quien es cada jugador.
-    player_uno = display.newText( player_uno_name, 30 , 15, native.systemFontBold, 12 );
+    player_uno = display.newText( player_uno_name, display.contentWidth / 2 - 50 , display.contentHeight - 15, native.systemFontBold, 12 );
     player_uno:setFillColor( 1, 1, 1 );
     group:insert( player_uno );
 
-    player_dos = display.newText( player_dos_name, display.contentWidth - 30 , display.contentHeight - 15, native.systemFontBold, 12 );
+    player_dos = display.newText( player_dos_name, display.contentWidth / 2  + 50, display.contentHeight - 15, native.systemFontBold, 12 );
     player_dos:setFillColor( 1, 1, 1 );
     group:insert( player_dos );
 
@@ -265,20 +257,20 @@ function scene:createScene( event )
     group:insert(txt_marcador_2);
 
     -- dibujamos la paleta izquierda para que el jugador pueda parar la bola.
-    paletaSuperior = display.newRect( 30, display.contentHeight / 2, 12, 70);
-    paletaSuperior:setFillColor( 1, 1, 1 );
-    fisica.addBody(paletaSuperior, "static", {density = 9.0});
-    group:insert(paletaSuperior);
+    paletaIzquierda = display.newImageRect( "paletaIzquierda.png", 60, 60 );
+    paletaIzquierda.x = 0;
+    paletaIzquierda.y = display.contentHeight / 2;
+    fisica.addBody(paletaIzquierda, "static");
+    group:insert(paletaIzquierda);
+    paletaIzquierda:addEventListener( "touch", movimiento );
 
     -- dibujamos la paleta derecha para que el jugador pueda parar la bola.
-    paletaInferior = display.newRect( display.contentWidth - 30, display.contentHeight / 2, 12, 70);
-    paletaInferior:setFillColor( 1, 1, 1 );
-    fisica.addBody(paletaInferior, "static", {density = 9.0});
-    paletaInferior.name = "paletaInferior";
-    group:insert(paletaInferior);
-
-    paletaInferior:addEventListener( "touch", movimiento );
-    paletaSuperior:addEventListener( "touch", movimiento );
+    paletaDerecha = display.newImageRect( "paletaDerecha.png", 60, 60 );
+    paletaDerecha.x = display.contentWidth;
+    paletaDerecha.y = display.contentHeight / 2;
+    fisica.addBody(paletaDerecha, "static");
+    group:insert(paletaDerecha);
+    paletaDerecha:addEventListener( "touch", movimiento );
 
     -- dibujamos la línea central de la pista de juego y la añadimos al grupo.
     local lineaCentral = display.newRect( centro_x, centro_y , 2, display.contentHeight);
@@ -302,7 +294,7 @@ function scene:createScene( event )
     linea_arriba:addEventListener( "collision", golpeo_pared );
 
     -- dibujamos el cronómetro
-    txt_crono = display.newText( minutos .. "0:0" .. number, display.contentWidth / 2 + (display.contentWidth / 3), 20, native.systemFont, 18 );
+    txt_crono = display.newText( minutos .. "0:0" .. number, display.contentWidth / 2, display.contentHeight - 40, native.systemFont, 18 );
     group:insert( txt_crono );
 end
 
