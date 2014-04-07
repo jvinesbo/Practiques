@@ -19,7 +19,7 @@ local function cargar()
 	progressView:setProgress( contador );
 
 	if (contador == 1) then
-		storyboard.gotoScene( "nombre_jugador");
+		storyboard.gotoScene( "opciones_juego");
 	end
 end 
 

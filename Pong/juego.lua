@@ -53,8 +53,9 @@ local bola_pintada = false;
 -- número de puntos para que termine la partida
 local tantos = 5;
 -- velocidad de la bola
-local velocidad_y;
-local velocidad_x;
+local velocidad;
+-- contador que nos servira para incrementar la velocidad de la bola;
+local contador;
 
 local function movimiento( event )
     if event.phase == "began" then
@@ -95,6 +96,20 @@ local function golpeo_bola( event )
 end
 
 local function cronometro()
+    -- comprobamos el valor del contador y si han pasado diez segundos incrementamos la velocidad.
+    if (contador == 10) then
+        local vx, vy = pelota:getLinearVelocity();
+
+        vx = vx + 60;
+        vy = vy + 60;
+
+        pelota:setLinearVelocity( vx, vy );
+
+        contador = 0;
+    else
+        contador = contador + 1;
+    end
+
     number = number + 1;
     if (number == 60) then
         number = 0;
@@ -125,14 +140,21 @@ local function pintar_bola()
         crono_empezado = true;
         cronometro = timer.performWithDelay(1000, cronometro, 0);
     end
+<<<<<<< HEAD
     velocidad_y = math.random(-80, 80);
     velocidad_x = math.random(200, 350);
+=======
+    velocidad = math.random(100, 200);
+>>>>>>> c3a1d34803c86e9f4441777c42d43b67b48ba5f0
     -- dibujamos la pelota y la posicionamos
     if (bola_pintada == false) then
         pelota = display.newCircle( display.contentWidth / 2, centro_y, 10 );
         pelota:setFillColor( 1, 1, 1, 0.7 );
         fisica.addBody(pelota, "dynamic", {bounce=1, density = 9.0, radius = 10});
-        pelota:setLinearVelocity( velocidad_x, velocidad_y);
+        pelota:setLinearVelocity( velocidad, velocidad);
+
+        -- inicializamos el contador
+        contador = 0;
 
         -- evento de colisión para que suene la pelota al colisionar contra las paletas.
         sonido_pelota = audio.loadSound( "golpe_pelota.mp3" );
