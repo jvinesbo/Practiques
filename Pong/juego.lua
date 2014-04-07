@@ -126,7 +126,7 @@ local function pintar_bola()
         cronometro = timer.performWithDelay(1000, cronometro, 0);
     end
     velocidad_y = math.random(-80, 80);
-    velocidad_x = math.random(100, 200);
+    velocidad_x = math.random(200, 350);
     -- dibujamos la pelota y la posicionamos
     if (bola_pintada == false) then
         pelota = display.newCircle( display.contentWidth / 2, centro_y, 10 );
