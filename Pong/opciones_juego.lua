@@ -22,7 +22,7 @@ end
 function scene:createScene( event )
     local group = self.view
 
-    local fondo = display.newImageRect( "fondo.jpg", 480, 320 )
+    local fondo = display.newImageRect( "fondo.png", 480, 320 )
 	fondo.x = 240
 	fondo.y = 160
 

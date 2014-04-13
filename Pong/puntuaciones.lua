@@ -35,6 +35,8 @@ function scene:createScene( event )
 
 	group:insert(fondo);
 
+	display.setDefault( "background", 1, 1, 1 );
+
 	local function onRowRender( event )
 		local row = event.row;
 

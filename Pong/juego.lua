@@ -53,9 +53,14 @@ local bola_pintada = false;
 -- número de puntos para que termine la partida
 local tantos = 5;
 -- velocidad de la bola
-local velocidad;
+local velocidadX;
+local velocidadY;
 -- contador que nos servira para incrementar la velocidad de la bola;
-local contador;
+local contador = 0;
+-- para comprobar si empezamos el juego
+local empezar_juego = false;
+-- variable que utilizamos para saber donde tenemos que pintar la bola si en la parte derecha o izquieda.
+local controlar_salida = false;
 
 local function movimiento( event )
     if event.phase == "began" then
@@ -97,65 +102,101 @@ end
 
 local function cronometro()
     -- comprobamos el valor del contador y si han pasado diez segundos incrementamos la velocidad.
-    if (contador == 10) then
-        local vx, vy = pelota:getLinearVelocity();
+    if (empezar_juego == true) then
+        if (contador == 10) then
+            if (bola_pintada == true) then
+                local vx, vy = pelota:getLinearVelocity();
+                -- comprobamos si las velocidades son positivas o negativas para que el incremento de velocidad funcione bien.
+                if (vx < 0) then
+                    vx = vx - 30;
+                else
+                    vx = vx + 30;
+                end
 
-        vx = vx + 60;
-        vy = vy + 60;
+                if (vy < 0) then
+                    vy = vy - 30;
+                else
+                    vy = vy + 30;
+                end 
 
-        pelota:setLinearVelocity( vx, vy );
+                pelota:setLinearVelocity( vx, vy );
 
-        contador = 0;
-    else
-        contador = contador + 1;
-    end
+                contador = 0;
+            end
+        else
+            if (bola_pintada == true) then
+                contador = contador + 1;
+            end 
+        end
 
-    number = number + 1;
-    if (number == 60) then
-        number = 0;
-        minutos = minutos + 1;
-    end
+        if (bola_pintada == true) then
+             number = number + 1;
+            if (number == 60) then
+                number = 0;
+                minutos = minutos + 1;
+            end
 
-    if (number < 10 and minutos == 0) then
-        tiempo = minutos .. "0:0" .. number;
-    end
+            if (number < 10 and minutos == 0) then
+                tiempo = minutos .. "0 0" .. number;
+            end
 
-    if (number >= 10 and minutos == 0) then
-        tiempo = minutos .. "0:" .. number;
-    end
+            if (number >= 10 and minutos == 0) then
+                tiempo = minutos .. "0 " .. number;
+            end
 
-    if (minutos > 0 and minutos < 10 and number < 10) then
-        tiempo = "0" .. minutos .. ":0" .. number;
-    end
+            if (minutos > 0 and minutos < 10 and number < 10) then
+                tiempo = "0" .. minutos .. " 0" .. number;
+            end
 
-    if (minutos > 0 and minutos < 10 and number >= 10) then
-        tiempo = "0" .. minutos .. ":" .. number;
-    end
+            if (minutos > 0 and minutos < 10 and number >= 10) then
+                tiempo = "0" .. minutos .. " " .. number;
+            end
 
-    txt_crono.text = tiempo;
+            if (minutos >= 10 and number < 10) then
+                tiempo = " " .. minutos .. " 0" .. number;
+            end
+
+            if (minutos >= 10 and number >= 10) then
+                tiempo = " " .. minutos .. " " .. number;
+            end
+
+            txt_crono.text = tiempo;
+        end
+    end 
 end
 
 local function pintar_bola()
-    if (crono_empezado == false) then
+    -- comprobación que hacemos para empezar el crono cuando pintemos la bola.
+    if (crono_empezado == false and bola_pintada == true) then
         crono_empezado = true;
         cronometro = timer.performWithDelay(1000, cronometro, 0);
     end
-    velocidad = math.random(100, 200);
-    -- dibujamos la pelota y la posicionamos
-    if (bola_pintada == false) then
-        pelota = display.newCircle( display.contentWidth / 2, centro_y, 10 );
-        pelota:setFillColor( 1, 1, 1, 0.7 );
-        fisica.addBody(pelota, "dynamic", {bounce=1, density = 9.0, radius = 10});
-        pelota:setLinearVelocity( velocidad, velocidad);
 
-        -- inicializamos el contador
-        contador = 0;
+    velocidadX = math.random(100, 200);
+    velocidadY = math.random(-200, 200 )
 
-        -- evento de colisión para que suene la pelota al colisionar contra las paletas.
-        sonido_pelota = audio.loadSound( "golpe_pelota.mp3" );
-        pelota:addEventListener( "collision", golpeo_bola );
+    if (empezar_juego == true) then
+        -- dibujamos la pelota y la posicionamos
+        if (bola_pintada == false) then
+            if (controlar_salida == false) then
+                pelota = display.newCircle( display.contentWidth - 20, paletaDerecha.y, 10 );
+            else
+                pelota = display.newCircle( 40, paletaIzquierda.y, 10 );
+            end
+            
+            pelota:setFillColor( 1, 1, 1, 0.7 );
+            fisica.addBody(pelota, "dynamic", {bounce=1, density = 9.0, radius = 10});
+            pelota:setLinearVelocity( velocidadX, velocidadY);
 
-        bola_pintada = true;
+            -- inicializamos el contador
+            contador = 0;
+
+            -- evento de colisión para que suene la pelota al colisionar contra las paletas.
+            sonido_pelota = audio.loadSound( "golpe_pelota.mp3" );
+            pelota:addEventListener( "collision", golpeo_bola );
+
+            bola_pintada = true;
+        end 
     end
 end
 
@@ -164,7 +205,7 @@ local function dialogo( event )
     if "clicked" == event.action then
         local i = event.index
         if 1 == i then
-
+            empezar_juego = true;
         end
     end
 end
@@ -173,24 +214,22 @@ end
 local function comprobacion()
     if (bola_pintada == true) then
         if (pelota.x >= display.contentWidth) then
-            pintar_bola();
-            velocidad = 200;
             puntos_1 = puntos_1 + 1;
             bola_pintada = false;
+            controlar_salida = false;
         end
 
         if (pelota.x <= 0) then    
-            pintar_bola();
-            velocidad = -200;
             puntos_2 = puntos_2 + 1;
             bola_pintada = false;
+            controlar_salida = true;
         end
     end
   
 
     if (puntos_1 == tantos) then
          local tabla = {
-            puntos = puntos_1; 
+            puntos = puntos_1  * (( minutos * 60) + number); 
             jugador = player_uno_name;
             tiempo = tiempo;
         };
@@ -199,13 +238,13 @@ local function comprobacion()
         local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].. player_uno_name ..[[',']].. puntos_1 ..[[',']].. tiempo ..[['); ]]
         db:exec(tablefill)
 
-        storyboard.gotoScene( "puntuaciones");
+        storyboard.gotoScene( "animacion");
         timer.cancel(timer1);
     end
 
     if (puntos_2 == tantos) then
         local tabla = {
-            puntos = puntos_2; 
+            puntos = puntos_2 * (( minutos * 60) + number); 
             jugador = player_dos_name;
             tiempo = tiempo;
         };
@@ -214,7 +253,7 @@ local function comprobacion()
         local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].. player_dos_name ..[[',']].. puntos_2 ..[[',']].. tiempo ..[['); ]]
         db:exec(tablefill)
 
-        storyboard.gotoScene( "puntuaciones");
+        storyboard.gotoScene( "animacion");
         timer.cancel(timer1);
     end
 
@@ -236,15 +275,22 @@ end
 function scene:createScene( event )
     local group = self.view;
 
+    display.setDefault( "background", 0, 0, 0 );
+
      -- inicializamos variables
     number = 0;
     minutos = 0;
     puntos_1 = 0;
     puntos_2 = 0;
     crono_empezado = false;
+    empezar_juego = false;
+    contador = 0;
+    controlar_salida = false;
 
     player_uno_name = myData.name_player_one;
     player_dos_name = myData.name_player_two;
+    
+    pintar_bola();
 
     -- mostrar información al usuario.
     local alert = native.showAlert( "Información", "Pulse sobre el fondo para que salga la bola.", { "OK" }, dialogo);

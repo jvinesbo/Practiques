@@ -1,7 +1,7 @@
 local widget = require("widget");
 local storyboard = require "storyboard";
-local myData = require "myData";
 local scene = storyboard.newScene();
+require( "conexion" );
 
 local progressView;
 local contador = 0;
@@ -19,14 +19,28 @@ local function cargar()
 	progressView:setProgress( contador );
 
 	if (contador == 1) then
-		storyboard.gotoScene( "opciones_juego");
+			-- creamos la tabla si no existe, despues recorremos la tabla para recuperar todas las puntuaciones. Despues lo añadimos al myData
+		--local tablesetup = [[DROP TABLE puntuaciones;]];
+		local tablesetup = [[CREATE TABLE IF NOT EXISTS datos (id INTEGER PRIMARY KEY, ids VARCHAR(100), username VARCHAR(100), email VARCHAR(100), puntos VARCHAR(100), fecha VARCHAR(100), dispositivo VARCHAR(100));]];
+		local  aux =  db:exec( tablesetup );
+
+		for row in db:nrows("SELECT * FROM datos") do
+			print( row.ids );
+		end
+
+		storyboard.gotoScene( "opciones_juego");	
 	end
 end 
 
 function scene:createScene( event )
     local group = self.view
 
-    local fondo = display.newImageRect( "fondo.jpg", 480, 320 )
+    -- quitar barra de estados
+    display.setStatusBar( display.HiddenStatusBar );
+
+  	display.setDefault( "background", 1, 1, 1 );
+
+    local fondo = display.newImageRect( "fondo.png", 480, 320 )
 	fondo.x = 240
 	fondo.y = 160
 
@@ -47,26 +61,14 @@ function scene:createScene( event )
 
 	local timer = timer.performWithDelay(1000, cargar, 5);
 
-	-- creamos la tabla si no existe, despues recorremos la tabla para recuperar todas las puntuaciones. Despues lo añadimos al myData
-	local tablesetup = [[CREATE TABLE IF NOT EXISTS puntuaciones (id INTEGER PRIMARY KEY, jugador, puntos, tiempo);]];
-	local  aux =  db:exec( tablesetup );
+	-- hacemos llamada a método GET de la clase conexion para recuperar toda la información de la base de datos.
+	Conexion:get("David", "vinyes@hotmail.es", "100");
 
-	for row in db:nrows("SELECT * FROM puntuaciones") do
-		local tabla = {
-            puntos = row.puntos; 
-            jugador = row.jugador;
-            tiempo = row.tiempo;
-        };
-
-        myData.partida[#myData.partida + 1] = tabla;
-	end
 end
 
 function scene:enterScene( event )
     local group = self.view;
 
-    -- quitar barra de estados
-    display.setStatusBar( display.HiddenStatusBar );
 end
 
 function scene:exitScene( event )
