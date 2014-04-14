@@ -8,3 +8,6 @@ Practiques
 **[CBEffects](https://github.com/GymbylCoding/CBEffects)** *y con una parte de servidor 
 desarrollada con* **[Nodejs](http://nodejs.org/)** *y* **[mongodb](https://www.mongodb.org/)**.
 
+## TODO (Por hacer)
+
+* Implementar la actualización de las bases de datos tanto local como remota.
