@@ -4,6 +4,13 @@ local myData = require "myData"
 storyboard.purgeOnSceneChange = true
 local widget = require( "widget" );
 
+-- incluimos una variable y el sqlite3
+local db;
+local sqlite3 = require "sqlite3"
+
+-- conexiones sqlite para guardar puntuaciones del juego.
+local path = system.pathForFile("data.db", system.DocumentsDirectory)
+db = sqlite3.open( path ) ;
 
 local tamanyo_width = display.actualContentWidth ;
 local tamanyo_height = display.actualContentHeight;
@@ -57,15 +64,9 @@ function scene:createScene( event )
 	 	onRowRender = onRowRender; 
 	}
 
-	if (#myData.partida == 1) then
-		local alert = native.showAlert( "Información", "No tienes puntuaciones.", { "OK" }, dialogo);
-	else 
-		for i = 1, #myData.partida do
-			if (i ~= 1) then
-				string = myData.partida[i].jugador .. " Puntos: " .. " " .. myData.partida[i].puntos .. " Tiempo: " .. myData.partida[i].tiempo;
-				tableView:insertRow{};
-			end
-		end
+	for row in db:nrows("SELECT * FROM datos ORDER BY puntos DESC LIMIT 5") do
+		string = row.username .. " Puntos: " .. " " .. row.puntos;
+		tableView:insertRow{};
 	end
 
 	group:insert(tableView);

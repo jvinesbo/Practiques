@@ -12,4 +12,9 @@ function DB:insertar( ids,  username,  email,  puntos, fecha, dispositivo)
     db:exec(tablefill);
 end
 
+function DB:actualizar( ids, id)
+    local tablefill =[[UPDATE datos SET ids = ]] .. ids .. [[ WHERE id = ]] .. id .. [[;]];
+    db:exec(tablefill);
+end
+
 return DB;

@@ -1,3 +1,5 @@
+require( "conexion" );
+
 local storyboard = require "storyboard";
 local myData = require "myData";
 local scene = storyboard.newScene();
@@ -228,33 +230,25 @@ local function comprobacion()
   
 
     if (puntos_1 == tantos) then
-         local tabla = {
-            puntos = puntos_1  * (( minutos * 60) + number); 
-            jugador = player_uno_name;
-            tiempo = tiempo;
-        };
-        myData.partida[#myData.partida + 1] = tabla;
-
-        local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].. player_uno_name ..[[',']].. puntos_1 ..[[',']].. tiempo ..[['); ]]
-        db:exec(tablefill)
+        puntos = puntos_1  * (( minutos * 60) + number); 
+        jugador = player_uno_name;
+        tiempo = tiempo;
 
         storyboard.gotoScene( "animacion");
         timer.cancel(timer1);
     end
 
     if (puntos_2 == tantos) then
-        local tabla = {
-            puntos = puntos_2 * (( minutos * 60) + number); 
-            jugador = player_dos_name;
-            tiempo = tiempo;
-        };
-        myData.partida[#myData.partida + 1] = tabla;
+        puntos = puntos_2 * (( minutos * 60) + number); 
+        jugador = player_dos_name;
+        tiempo = tiempo;
         
-        local tablefill =[[INSERT INTO puntuaciones VALUES (NULL, ']].. player_dos_name ..[[',']].. puntos_2 ..[[',']].. tiempo ..[['); ]]
-        db:exec(tablefill)
-
         storyboard.gotoScene( "animacion");
         timer.cancel(timer1);
+    end
+
+    if (tantos == puntos_1 or tantos == puntos_2) then
+        Conexion:post(jugador, "", puntos, nil);
     end
 
     -- actualizamos el texto para saber el número de rebotes de los jugadores.

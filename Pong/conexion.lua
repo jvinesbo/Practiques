@@ -29,8 +29,7 @@ function Conexion:get()
         network.request( "http://192.168.2.227:8000/extraer", "GET", networkListener, params);
 end
 
-
-function Conexion:post(username, email, puntos)
+function Conexion:post(username, email, puntos, aux)
         local date = os.date( "%c" );
         local modelo = system.getInfo( "model" );
         local imei = system.getInfo( "deviceID" );
@@ -38,11 +37,16 @@ function Conexion:post(username, email, puntos)
 
         local function postListener( event )
                 if ( event.isError ) then
-                        DB:insertar(nil, username, email, puntos, date, dispositivo );
+                        DB:insertar(0, username, email, puntos, date, dispositivo );
                         print( "Network error!");
                 else
                         print ( "RESPONSE: " .. event.response );
-                        DB:insertar(event.response, username, email, puntos, date, dispositivo );
+                        if (aux == nil) then
+                                DB:insertar(event.response, username, email, puntos, date, dispositivo );
+                        else
+                                DB:actualizar(event.response, aux );
+                        end
+                        
                 end
         end
 

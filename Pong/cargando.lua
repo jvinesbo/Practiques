@@ -24,7 +24,9 @@ local function cargar()
 		local tablesetup = [[CREATE TABLE IF NOT EXISTS datos (id INTEGER PRIMARY KEY, ids VARCHAR(100), username VARCHAR(100), email VARCHAR(100), puntos VARCHAR(100), fecha VARCHAR(100), dispositivo VARCHAR(100));]];
 		local  aux =  db:exec( tablesetup );
 
-		for row in db:nrows("SELECT * FROM datos") do
+		for row in db:nrows("SELECT * FROM datos WHERE ids = 0") do
+			Conexion:post(row.username, row.email, row.puntos, row.id);
+
 			print( row.ids );
 		end
 
@@ -60,10 +62,6 @@ function scene:createScene( event )
 	group:insert(cargando);
 
 	local timer = timer.performWithDelay(1000, cargar, 5);
-
-	-- hacemos llamada a método GET de la clase conexion para recuperar toda la información de la base de datos.
-	Conexion:get("David", "vinyes@hotmail.es", "100");
-
 end
 
 function scene:enterScene( event )

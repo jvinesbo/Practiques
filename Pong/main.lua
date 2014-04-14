@@ -1,3 +1,3 @@
 local storyboard = require "storyboard";
 
-storyboard.gotoScene( "animacion");
+storyboard.gotoScene( "cargando");
