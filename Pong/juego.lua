@@ -171,7 +171,6 @@ local function pintar_bola()
         crono_empezado = true;
         cronometro = timer.performWithDelay(1000, cronometro, 0);
     end
-<<<<<<< HEAD
 
     velocidadX = math.random(100, 200);
     velocidadY = math.random(-200, 200 )
@@ -198,29 +197,6 @@ local function pintar_bola()
 
             bola_pintada = true;
         end 
-=======
-<<<<<<< HEAD
-    velocidad_y = math.random(-80, 80);
-    velocidad_x = math.random(200, 350);
-=======
-    velocidad = math.random(100, 200);
->>>>>>> c3a1d34803c86e9f4441777c42d43b67b48ba5f0
-    -- dibujamos la pelota y la posicionamos
-    if (bola_pintada == false) then
-        pelota = display.newCircle( display.contentWidth / 2, centro_y, 10 );
-        pelota:setFillColor( 1, 1, 1, 0.7 );
-        fisica.addBody(pelota, "dynamic", {bounce=1, density = 9.0, radius = 10});
-        pelota:setLinearVelocity( velocidad, velocidad);
-
-        -- inicializamos el contador
-        contador = 0;
-
-        -- evento de colisión para que suene la pelota al colisionar contra las paletas.
-        sonido_pelota = audio.loadSound( "golpe_pelota.mp3" );
-        pelota:addEventListener( "collision", golpeo_bola );
-
-        bola_pintada = true;
->>>>>>> 8a9ab8102c13da0e78c0d2600d6ba35daebfff1f
     end
 end
 

@@ -33,7 +33,9 @@ end
 
 local function transicion( )
     if ( aux == true ) then
-        transition.moveBy( display.newText("Pulse sobre el fondo", 0, _H -10, "Arial", 10), { x= _W + 100, y=0, time=5000 } );
+        transition.moveBy( square , { x= _W + 100, y=0, time=5000 } );
+    else
+        transition.cancel( square );
     end
 end
 
@@ -41,6 +43,11 @@ local function pulsado(event)
     if ( event.phase == "began" ) then
         
     elseif ( event.phase == "ended" ) then
+        vent:stop();
+        timer.cancel(temporizador);
+        Runtime:removeEventListener( "touch", pulsado );
+        aux = false;
+
        storyboard.gotoScene( "puntuaciones");
     end
 end 
@@ -57,7 +64,7 @@ function scene:createScene( event )
 
     display.setStatusBar( display.HiddenStatusBar );
 
-    local txtNombre = display.newText(" ", 100, 100, "Arial", 24);
+    local txtNombre = display.newText("", 100, 100, "Arial", 24);
     txtNombre.x = _W/2
     txtNombre.y = _H/2 + _H/8
     group:insert(txtNombre);
@@ -65,7 +72,7 @@ function scene:createScene( event )
 	display.setDefault( "background", 0.1, 0, 0 );
 	timer.performWithDelay(100, transicion, 1);
 
-    square = display.newText("", 0, _H -10, "Arial", 10)
+    square = display.newText("Pulse sobre el fondo", 0, _H -10, "Arial", 10);
     group:insert(square);
 
     Runtime:addEventListener( "touch", pulsado );
@@ -80,10 +87,6 @@ end
 
 function scene:exitScene( event )
     local group = self.view;
-    vent:stop();
-    transition.cancel();
-    timer.cancel(temporizador);
-    aux = false;
 end
 
 function scene:destroyScene( event )
