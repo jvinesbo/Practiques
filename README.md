@@ -5,6 +5,6 @@ Practiques
 
 *Bienvenidos a mi proyecto de prueba de corona sdk. Se trata del típico juego del Pong utilizando el sdk 
 [Corona](http://coronalabs.com/products/corona-sdk/) y utilizando la libreria de partículas 
-**[CBEffects](https://github.com/GymbylCoding/CBEffects)** y con una parte de servidor 
+***[CBEffects](https://github.com/GymbylCoding/CBEffects)** y con una parte de servidor 
 desarrollada con **[Nodejs](http://nodejs.org/)** y **[mongodb](https://www.mongodb.org/)**.
 
