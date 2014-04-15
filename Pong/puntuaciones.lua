@@ -20,7 +20,11 @@ local string;
 local function eventoJuego( event )
 
     if ( "ended" == event.phase ) then
-        storyboard.gotoScene( "nombre_jugador");
+		if (myData.name_player_one == nil or myData.name_player_two == nil) then
+	        storyboard.gotoScene( "nombre_jugador" );
+	    else
+	         storyboard.gotoScene( "juego");
+	    end
     end
 end
 
@@ -35,6 +39,8 @@ end
 
 function scene:createScene( event )
     local group = self.view
+
+    audio.play( sonido_app );
 
     local fondo = display.newImageRect( "puntuaciones.png", 480, 320 )
 	fondo.x = 240

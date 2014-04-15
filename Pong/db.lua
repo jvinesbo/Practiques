@@ -17,4 +17,11 @@ function DB:actualizar( ids, id)
     db:exec(tablefill);
 end
 
+function DB:seleccionar(puntos, fecha)
+	local booleano = true;
+	for row in db:nrows("SELECT * FROM datos WHERE puntos =" .. puntos .. " AND fecha LIKE '" .. fecha .. "%' LIMIT 1") do
+        booleano = false;
+    end
+    return booleano;
+end
 return DB;

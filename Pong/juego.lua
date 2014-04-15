@@ -7,6 +7,7 @@ storyboard.purgeOnSceneChange = true;
 system.activate("multitouch");
 require "sqlite3";
 local db;
+require "back_button";
 
 -- conexiones sqlite para guardar puntuaciones del juego.
 local path = system.pathForFile("data.db", system.DocumentsDirectory)
@@ -63,6 +64,8 @@ local contador = 0;
 local empezar_juego = false;
 -- variable que utilizamos para saber donde tenemos que pintar la bola si en la parte derecha o izquieda.
 local controlar_salida = false;
+-- sonido al hacer un punto
+local sonido_punto;
 
 local function movimiento( event )
     if event.phase == "began" then
@@ -216,13 +219,17 @@ end
 local function comprobacion()
     if (bola_pintada == true) then
         if (pelota.x >= display.contentWidth) then
+            audio.play( sonido_punto );
             puntos_1 = puntos_1 + 1;
+            display.remove( pelota );
             bola_pintada = false;
             controlar_salida = false;
         end
 
-        if (pelota.x <= 0) then    
+        if (pelota.x <= 0) then   
+            audio.play( sonido_punto ); 
             puntos_2 = puntos_2 + 1;
+            display.remove( pelota );
             bola_pintada = false;
             controlar_salida = true;
         end
@@ -232,23 +239,27 @@ local function comprobacion()
     if (puntos_1 == tantos) then
         puntos = puntos_1  * (( minutos * 60) + number); 
         jugador = player_uno_name;
-        tiempo = tiempo;
 
-        storyboard.gotoScene( "animacion");
         timer.cancel(timer1);
     end
 
     if (puntos_2 == tantos) then
         puntos = puntos_2 * (( minutos * 60) + number); 
         jugador = player_dos_name;
-        tiempo = tiempo;
         
-        storyboard.gotoScene( "animacion");
         timer.cancel(timer1);
     end
 
     if (tantos == puntos_1 or tantos == puntos_2) then
+        local tabla = {
+            puntos = puntos; 
+            username = jugador;
+        };
+        myData.partida[#myData.partida + 1] = tabla;
+
         Conexion:post(jugador, "", puntos, nil);
+
+        storyboard.gotoScene( "animacion");
     end
 
     -- actualizamos el texto para saber el número de rebotes de los jugadores.
@@ -269,6 +280,8 @@ end
 function scene:createScene( event )
     local group = self.view;
 
+    audio.pause( sonido_app );
+
     display.setDefault( "background", 0, 0, 0 );
 
      -- inicializamos variables
@@ -283,7 +296,7 @@ function scene:createScene( event )
 
     player_uno_name = myData.name_player_one;
     player_dos_name = myData.name_player_two;
-    
+
     pintar_bola();
 
     -- mostrar información al usuario.
@@ -344,6 +357,8 @@ function scene:createScene( event )
 
     fisica.addBody(linea_bajo, "static", {});
     fisica.addBody(linea_arriba, "static", {});
+
+    sonido_punto = audio.loadSound( "gol.mp3" );
 
     -- evento de colisión para que suene la pelota al rebotar contra las paredes.
     sonido_pared = audio.loadSound( "golpe_pared.mp3" );

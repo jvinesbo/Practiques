@@ -1,5 +1,14 @@
 local storyboard = require "storyboard";
 local scene = storyboard.newScene();
+local myData = require "myData";
+
+-- incluimos una variable y el sqlite3
+local db;
+local sqlite3 = require "sqlite3"
+
+-- conexiones sqlite para guardar puntuaciones del juego.
+local path = system.pathForFile("data.db", system.DocumentsDirectory)
+db = sqlite3.open( path ) ;
 
 local CBE =	require( "CBEffects.Library" );
 local vent = CBE.newVent {
@@ -17,6 +26,9 @@ local txt_taptobegin;
 local square;
 local temporizador;
 local aux = false;
+local usuario;
+local puntos;
+local ganador;
 
 _W = display.contentWidth; 
 _H = display.contentHeight; 
@@ -64,7 +76,17 @@ function scene:createScene( event )
 
     display.setStatusBar( display.HiddenStatusBar );
 
-    local txtNombre = display.newText("", 100, 100, "Arial", 24);
+    usuario = myData.name;
+    puntos = myData.points;
+
+    for i = 1, #myData.partida do
+           if (i ~= 1) then
+                usuario = myData.partida[i].username;
+                puntos = myData.partida[i].puntos;
+           end
+       end
+
+    local txtNombre = display.newText(usuario.." "..puntos.." puntos", 100, 100, "Arial", 24);
     txtNombre.x = _W/2
     txtNombre.y = _H/2 + _H/8
     group:insert(txtNombre);
@@ -76,6 +98,8 @@ function scene:createScene( event )
     group:insert(square);
 
     Runtime:addEventListener( "touch", pulsado );
+
+    ganador = audio.loadSound( "ganador.mp3" );
 end
 
 function scene:enterScene( event )
@@ -83,10 +107,13 @@ function scene:enterScene( event )
     vent:start();
     txt_blink = timer.performWithDelay(500, blink, 0);
     temporizador = timer.performWithDelay(5100, transicion, 0);
+
+    audio.play( ganador );
 end
 
 function scene:exitScene( event )
     local group = self.view;
+    audio.stop();
 end
 
 function scene:destroyScene( event )

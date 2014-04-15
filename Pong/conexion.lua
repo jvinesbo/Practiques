@@ -42,7 +42,9 @@ function Conexion:post(username, email, puntos, aux)
                 else
                         print ( "RESPONSE: " .. event.response );
                         if (aux == nil) then
-                                DB:insertar(event.response, username, email, puntos, date, dispositivo );
+                                if (DB:seleccionar(puntos, os.date( "%x" ))) then
+                                        DB:insertar(event.response, username, email, puntos, date, dispositivo );
+                                end     
                         else
                                 DB:actualizar(event.response, aux );
                         end

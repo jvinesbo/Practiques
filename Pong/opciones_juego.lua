@@ -1,6 +1,7 @@
 local widget = require("widget");
 local storyboard = require "storyboard";
 local scene = storyboard.newScene();
+require "back_button";
 
 local tamanyo_width = display.actualContentWidth ;
 local tamanyo_height = display.actualContentHeight;
