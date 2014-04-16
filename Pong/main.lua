@@ -17,6 +17,15 @@ db = sqlite3.open( path ) ;
         print( row.puntos );
 end]]--
 
+Runtime:addEventListener('key', function (event)
+    if event.keyName == 'back' and event.phase == 'down' then
+        local scene = storyboard.getScene(storyboard.getCurrentSceneName())
+        if scene and type(scene.backPressed) == 'function' then
+            return scene:backPressed()
+        end
+    end
+end);
+
 sonido_app = audio.loadSound( "funnysong.mp3" );
 audio.play( sonido_app );
 

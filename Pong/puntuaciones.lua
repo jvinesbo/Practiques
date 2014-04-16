@@ -17,6 +17,11 @@ local tamanyo_height = display.actualContentHeight;
 
 local string;
 
+function scene:backPressed()
+    storyboard.gotoScene('opciones_juego', 'slideRight', 200)
+    return true
+end
+
 local function eventoJuego( event )
 
     if ( "ended" == event.phase ) then
@@ -40,7 +45,10 @@ end
 function scene:createScene( event )
     local group = self.view
 
-    audio.play( sonido_app );
+ 	if (storyboard.getPrevious() ~= "opciones_juego") then
+ 		audio.play( sonido_app );
+ 	end
+    
 
     local fondo = display.newImageRect( "puntuaciones.png", 480, 320 )
 	fondo.x = 240

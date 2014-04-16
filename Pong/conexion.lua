@@ -37,12 +37,14 @@ function Conexion:post(username, email, puntos, aux)
 
         local function postListener( event )
                 if ( event.isError ) then
-                        DB:insertar(0, username, email, puntos, date, dispositivo );
+                        if (DB:seleccionar(puntos)) then
+                                DB:insertar(0, username, email, puntos, date, dispositivo );
+                        end    
                         print( "Network error!");
                 else
                         print ( "RESPONSE: " .. event.response );
                         if (aux == nil) then
-                                if (DB:seleccionar(puntos, os.date( "%x" ))) then
+                                if (DB:seleccionar(puntos)) then
                                         DB:insertar(event.response, username, email, puntos, date, dispositivo );
                                 end     
                         else

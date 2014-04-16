@@ -22,6 +22,11 @@ local function dialogo( event )
     end
 end
 
+function scene:backPressed()
+    storyboard.gotoScene('opciones_juego', 'slideRight', 200)
+    return true
+end
+
 local function textListener( event )
 
     if ( event.phase == "began" ) then

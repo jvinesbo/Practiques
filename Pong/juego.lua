@@ -7,7 +7,6 @@ storyboard.purgeOnSceneChange = true;
 system.activate("multitouch");
 require "sqlite3";
 local db;
-require "back_button";
 
 -- conexiones sqlite para guardar puntuaciones del juego.
 local path = system.pathForFile("data.db", system.DocumentsDirectory)
@@ -17,6 +16,11 @@ local fisica = require( "physics" )
 fisica.start();
 physics.setGravity(0, 0);
 --fisica.setDrawMode("hybrid");
+
+function scene:backPressed()
+    storyboard.gotoScene('opciones_juego', 'slideRight', 200)
+    return true
+end
 
 local tamanyo_width = display.actualContentWidth ;
 local tamanyo_height = display.actualContentHeight;
